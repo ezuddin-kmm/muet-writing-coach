@@ -27,22 +27,69 @@ function item(title,detail,state='note'){return `<div class="item"><span class="
 const API_URL = "https://muet-writing-api.mezuddin.workers.dev/public-check";
 
   
-  document.getElementById('check').addEventListener('click',()=>{
-let q=question.value.trim(), a=answer.value.trim(), n=words(a).length;
-if(!q||!a){feedback.className='feedback show';feedback.innerHTML=item('Missing input','Please provide both the complete writing question and your response.','warn');return}
-let lines=a.split(/\n+/).map(x=>x.trim()).filter(Boolean),first=lines[0]||'',last=lines.slice(-2).join(' '),chunks=a.split(/\n\s*\n/).filter(x=>x.trim());
-let greeting=/^(dear\b|hi\b|hello\b|good (morning|afternoon|evening)\b)/i.test(first), closing=/\b(yours sincerely|yours faithfully|best regards|kind regards|best wishes|regards|sincerely|take care|see you|love)\b/i.test(last);
-let questionNotes=(q.match(/(?:^|\n)\s*(?:[•*-]|\d+[.)])\s+[^\n]+/g)||[]).length;
-let html='<h2 style="margin-top:22px">Your feedback</h2>';
-html+=item('Word count',`${n} words. Check the word limit or recommended length stated in your actual task.`,'ok');
-html+=item('Greeting',greeting?'A common greeting appears at the beginning. Check that it matches the recipient and required formality.':'No common greeting was detected at the beginning. Confirm whether you need one.',greeting?'ok':'warn');
-html+=item('Closing',closing?'A common sign-off was detected. Confirm that it fits the relationship and tone.':'A common email or letter sign-off was not detected. Check the end of your response.',closing?'ok':'warn');
-html+=item('Paragraphing',chunks.length>=3?`Your response has ${chunks.length} separated text blocks. Check that each paragraph develops a clear idea.`:`Your response has ${chunks.length} separated text block(s). Consider separating the opening, main ideas and closing.`,chunks.length>=3?'ok':'note');
-html+=item('Question and task notes',questionNotes?`${questionNotes} bullet or numbered note(s) were identified in the question. This checker cannot confirm whether you have addressed and elaborated on all of them. Compare each note and every instruction in the stimulus against your response.`:'Reread every sentence of the stimulus and all notes. This checker cannot determine whether your response fulfils them.');
-html+=item('Grammar, vocabulary and tone','Read each sentence for tense, subject–verb agreement, clarity, appropriate vocabulary and formal/informal tone. Detailed grammar and meaning checks require an additional language-analysis engine.');
-html+=item('Your next step','Highlight each point in the question, underline where you answered it, and add an explanation, reason or example where needed. Revise your response and check again.');
-feedback.innerHTML=html;feedback.className='feedback show';feedback.scrollIntoView({behavior:'smooth',block:'start'});
+
+document.getElementById('check').addEventListener('click', async () => {
+  const q = question.value.trim();
+  const a = answer.value.trim();
+  const button = document.getElementById('check');
+
+  if (!q || !a) {
+    feedback.className = 'feedback show';
+    feedback.textContent = 'Please provide both the question and your answer.';
+    return;
+  }
+
+  const token = document.querySelector(
+    '[name="cf-turnstile-response"]'
+  )?.value;
+
+  if (!token) {
+    feedback.className = 'feedback show';
+    feedback.textContent = 'Please complete the security verification.';
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Checking your writing...';
+  feedback.className = 'feedback show';
+  feedback.textContent = 'Your writing is being assessed.';
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        question: q,
+        answer: a,
+        turnstileToken: token
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || 'Unable to assess your writing.'
+      );
+    }
+
+    feedback.textContent = result.feedback ||
+      'No feedback was returned.';
+
+  } catch (error) {
+    feedback.textContent = error.message ||
+      'Connection failed. Please try again.';
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Check My Writing';
+    if (window.turnstile) {
+      window.turnstile.reset();
+    }
+  }
 });
+
 document.getElementById('extract').addEventListener('click',async()=>{
 const file=document.getElementById('photo').files[0],status=document.getElementById('ocrStatus'),button=document.getElementById('extract');if(!file){status.textContent='Choose an image first.';return}if(file.size>10*1024*1024){status.textContent='Please choose an image smaller than 10 MB.';return}
 button.disabled=true;status.textContent='Loading text recognition. First use may take a little longer...';let worker;
