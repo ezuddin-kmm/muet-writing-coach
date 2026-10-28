@@ -24,7 +24,10 @@ function words(v){return (v.trim().match(/\b[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]
 answer.addEventListener('input',()=>document.getElementById('wordCount').textContent=`${words(answer.value).length} words`);
 function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function item(title,detail,state='note'){return `<div class="item"><span class="tag ${state}">${state==='ok'?'Found':state==='warn'?'Review':'Check'}</span><strong>${title}</strong><div>${escapeHtml(detail)}</div></div>`}
-document.getElementById('check').addEventListener('click',()=>{
+const API_URL = "https://muet-writing-api.mezuddin.workers.dev/public-check";
+
+  
+  document.getElementById('check').addEventListener('click',()=>{
 let q=question.value.trim(), a=answer.value.trim(), n=words(a).length;
 if(!q||!a){feedback.className='feedback show';feedback.innerHTML=item('Missing input','Please provide both the complete writing question and your response.','warn');return}
 let lines=a.split(/\n+/).map(x=>x.trim()).filter(Boolean),first=lines[0]||'',last=lines.slice(-2).join(' '),chunks=a.split(/\n\s*\n/).filter(x=>x.trim());
