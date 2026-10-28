@@ -15,10 +15,16 @@
 <main>
 <section class="panel"><h2>1. Provide the complete writing question</h2><label for="question">Paste or type the stimulus and all notes</label><textarea id="question" placeholder="Paste the original email or letter prompt here, including all instructions and notes..."></textarea><p class="subtle">Alternatively, upload a clear screenshot or photo. Text is extracted on your device. Always check and correct the extracted question before assessing your answer.</p><label for="photo">Upload question image (optional)</label><input type="file" id="photo" accept="image/png,image/jpeg,image/webp"/><div class="row"><button class="button secondary" id="extract" type="button">Extract text from photo</button></div><div id="ocrStatus" class="status" role="status"></div></section>
 <section class="panel"><h2>2. Paste your email or letter</h2><label for="answer">Your response</label><textarea id="answer" style="min-height:250px" placeholder="Dear ...\n\nThank you for your email..." ></textarea><div class="counter" id="wordCount">0 words</div></section>
-<section class="panel"><h2>3. Receive initial feedback</h2><p class="subtle">This first version checks visible writing features and encourages self-review. It does <strong>not</strong> provide reliable AI grammar correction, semantic task fulfilment assessment, MUET marks or bands.</p>
+
+<section class="panel">
+  <h2>3. Receive AI Writing Feedback</h2>
+  <p class="subtle">Receive AI-assisted feedback on your MUET Writing Task 1 response. The feedback covers task fulfilment, grammar, vocabulary, organisation and areas for improvement. This tool supports learning and self-review. It does not provide official MUET marks or bands.</p>
+
   <div class="cf-turnstile" data-sitekey="0x4AAAAAAFnc_G7pS_h0_3hA"></div>
   <button class="button" id="check" type="button">Check My Writing</button><div id="feedback" class="feedback" aria-live="polite"></div></section>
-<p class="subtle disclaimer">Privacy: This version processes typed writing in your browser and does not send submissions to a website database. Photo recognition loads the open-source Tesseract.js library from a third-party CDN when requested. Avoid entering names, contact details or other sensitive personal information.</p>
+
+<p class="subtle disclaimer">Privacy: Your writing question and response are sent securely through Cloudflare to Google's Gemini AI service to generate feedback. AI feedback may contain errors and should be reviewed critically. This website does not intentionally store your submitted writing in its own database. If you use photo-to-text recognition, Tesseract.js is loaded from a third-party CDN to process the image in your browser. Do not submit personal details, passwords or sensitive information.</p>
+
 </main>
 <script>
 const question=document.getElementById('question'), answer=document.getElementById('answer'), feedback=document.getElementById('feedback');
